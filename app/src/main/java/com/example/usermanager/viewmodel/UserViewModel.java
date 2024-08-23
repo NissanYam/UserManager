@@ -20,7 +20,7 @@ public class UserViewModel extends AndroidViewModel {
     public UserViewModel(@NonNull Application application) {
         super(application);
         Log.d(TAG, "UserViewModel created");
-        repository = new UserRepository(application);
+        repository = UserRepository.getInstance(application);
         allUsers = repository.getUsers();
     }
 

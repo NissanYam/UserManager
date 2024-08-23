@@ -60,8 +60,8 @@ public class MainActivity extends AppCompatActivity implements UserListFragment.
     public void onUserSelected(User user) {
         if (user != null) {
             Log.d("MainActivity", "User selected: " + user.getFirst_name() + " " + user.getLast_name());
-            userPageFragment.setUser(user);
             loadFragment(this.userPageFragment, R.id.fragment_user);
+            userPageFragment.setUser(user);
         }
     }
 

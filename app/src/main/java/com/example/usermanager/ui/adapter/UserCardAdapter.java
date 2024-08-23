@@ -7,12 +7,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.usermanager.R;
 import com.example.usermanager.model.apiUser.models.User;
 
+import java.util.Collections;
 import java.util.List;
 
 public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserViewHolder> {
@@ -43,10 +45,20 @@ public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserVi
         return (userList != null) ? userList.size() : 0;
     }
 
-    public void setUserList(List<User> users) {
-        this.userList = users;
-        notifyDataSetChanged();
+    public void setUserList(List<User> newUserList) {
+        if (newUserList == null) {
+            newUserList = Collections.emptyList();
+        }
+        if (this.userList == null) {
+            this.userList = Collections.emptyList();
+        }
+
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new UserDiffCallback(this.userList, newUserList));
+        this.userList = newUserList;
+        diffResult.dispatchUpdatesTo(this);
     }
+
+
 
     public interface OnUserClickListener {
         void onUserClick(User user);

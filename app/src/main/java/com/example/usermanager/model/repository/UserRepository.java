@@ -18,53 +18,59 @@ import com.example.usermanager.model.apiUser.service.UsersApiService;
 import com.example.usermanager.model.db.dao.UserDAO;
 import com.example.usermanager.model.db.database.UsersDatabase;
 import com.example.usermanager.utils.RetrofitClient;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UserRepository {
     private static final String TAG = "UserRepository";
+    private static UserRepository instance;
     private final Application application;
     private final UsersApiService usersApiService;
     private final UserDAO userDAO;
-    // LiveData to observe user list changes
     private LiveData<List<User>> allUsers;
+    private static final Object LOCK = new Object();
 
-    public UserRepository(Application application) {
-        this.application = application; // Initialize application context
-        // Initialize Retrofit client for API requests
+    private UserRepository(Application application) {
+        this.application = application;
         String baseUrl = "https://reqres.in/api/";
         usersApiService = RetrofitClient.getClient(baseUrl).create(UsersApiService.class);
-        // Initialize Room database with a callback
         RoomDatabase.Callback myCallback = new RoomDatabase.Callback() {
             @Override
             public void onCreate(@NonNull SupportSQLiteDatabase db) {
                 super.onCreate(db);
                 Log.d(TAG, "Database created. Fetching users...");
-                // Fetch users from API and populate the database when it is created
                 fetchUsers(1);
             }
             @Override
             public void onOpen(@NonNull SupportSQLiteDatabase db) {
                 super.onOpen(db);
                 Log.d(TAG, "Database opened.");
-                // Optionally perform actions every time the database is opened
             }
         };
-        // Build the Room database instance
         UsersDatabase usersDatabase = Room.databaseBuilder(application, UsersDatabase.class, "users_database")
                 .addCallback(myCallback)
                 .build();
-        // Get DAO instance for user operations
         userDAO = usersDatabase.getUserDAO();
-        // Initialize LiveData
-        allUsers = userDAO.getAllUsers(); // Assuming this returns LiveData<List<User>>
-
+        allUsers = userDAO.getAllUsers();
     }
-    // Fetch users from the API and save them to the local database
+
+    public static UserRepository getInstance(Application application) {
+        if (instance == null) {
+            synchronized (LOCK) {
+                if (instance == null) {
+                    instance = new UserRepository(application);
+                }
+            }
+        }
+        return instance;
+    }
+
     private void fetchUsers(int page) {
         Log.d(TAG, "Fetching users from page: " + page);
         usersApiService.getUsers(page).enqueue(new Callback<UserResponse>() {
@@ -74,11 +80,9 @@ public class UserRepository {
                     List<User> users = response.body().getData();
                     Log.d(TAG, "Received " + users.size() + " users from API.");
                     if (!users.isEmpty()) {
-                        // Insert users into the database
                         for (User user : users) {
                             addUser(user);
                         }
-                        // Fetch next page of users
                         fetchUsers(page + 1);
                     }
                     return;
@@ -92,7 +96,7 @@ public class UserRepository {
             }
         });
     }
-    // Add user in the background and show a Toast message on the main thread
+
     public void addUser(User user) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
@@ -105,13 +109,11 @@ public class UserRepository {
         });
     }
 
-    // Retrieve all users from the local database
     public LiveData<List<User>> getUsers() {
         Log.d(TAG, "Retrieving all users.");
         return allUsers;
     }
 
-    // Delete a user from the local database
     public void deleteUser(User user) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
@@ -120,7 +122,6 @@ public class UserRepository {
         });
     }
 
-    // Update user details in the local database
     public void updateUser(User user) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
@@ -129,7 +130,6 @@ public class UserRepository {
         });
     }
 
-    // Retrieve a user by ID from the local database
     public LiveData<User> getUserById(int id) {
         Log.d(TAG, "Retrieving user by ID: " + id);
         return userDAO.getUserById(id);

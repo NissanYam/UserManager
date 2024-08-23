@@ -37,15 +37,33 @@ public class UserPageFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Load user data if it's already available
+        if (currentUser != null) {
+            loadUserData(currentUser);
+        }
+    }
+
     public void setUser(User user) {
         currentUser = user;
+        // Check if the view is already created, if yes, load data immediately
+        if (getView() != null) {
+            loadUserData(user);
+        }
+    }
+
+    private void loadUserData(User user) {
         userFullNameTV.setText(user.getFirst_name() + " " + user.getLast_name());
         userEmailTV.setText(user.getEmail());
         userIdTV.setText(String.valueOf(user.getId()));
-        Glide.with(this).
-                load(user.getAvatar()).
-                placeholder(R.drawable.ic_user_placeholder).
-                into(userImageView);
+
+        if (isAdded()) {
+            Glide.with(this)
+                    .load(user.getAvatar())
+                    .placeholder(R.drawable.ic_user_placeholder)
+                    .into(userImageView);
+        }
     }
 }
-
