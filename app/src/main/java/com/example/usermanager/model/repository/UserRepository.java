@@ -1,101 +1,137 @@
 package com.example.usermanager.model.repository;
 
-import android.content.Context;
+import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
+import androidx.sqlite.db.SupportSQLiteDatabase;
+
 import com.example.usermanager.model.apiUser.models.User;
-import com.example.usermanager.model.apiUser.models.UserListResponse;
-import com.example.usermanager.model.apiUser.service.UserApiService;
-import com.example.usermanager.model.db.dao.UserCRUD;
-import com.example.usermanager.model.db.database.AppDatabase;
-import com.example.usermanager.model.db.entitys.UserEntity;
+import com.example.usermanager.model.apiUser.models.UserResponse;
+import com.example.usermanager.model.apiUser.service.UsersApiService;
+import com.example.usermanager.model.db.dao.UserDAO;
+import com.example.usermanager.model.db.database.UsersDatabase;
 import com.example.usermanager.utils.RetrofitClient;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UserRepository {
-    private UserApiService userApiService;
-    private UserCRUD userCRUD;
-    private MutableLiveData<List<UserEntity>> userListLiveData = new MutableLiveData<>();
+    private static final String TAG = "UserRepository";
+    private final Application application;
+    private final UsersApiService usersApiService;
+    private final UserDAO userDAO;
+    // LiveData to observe user list changes
+    private LiveData<List<User>> allUsers;
 
-    public UserRepository(Context context) {
-        userApiService = RetrofitClient.getApiService();
-        userCRUD = AppDatabase.getDatabase(context).userCRUD();
-    }
-    public void fetchUsersFromApi(int page) {
-        userApiService.getUsers(page).enqueue(new Callback<UserListResponse>() {
+    public UserRepository(Application application) {
+        this.application = application; // Initialize application context
+        // Initialize Retrofit client for API requests
+        String baseUrl = "https://reqres.in/api/";
+        usersApiService = RetrofitClient.getClient(baseUrl).create(UsersApiService.class);
+        // Initialize Room database with a callback
+        RoomDatabase.Callback myCallback = new RoomDatabase.Callback() {
             @Override
-            public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<User> users = response.body().getUsers();
-                    if (users != null && !users.isEmpty()) {
-                        // Insert users into the local database
-                        insertUsers(users);
+            public void onCreate(@NonNull SupportSQLiteDatabase db) {
+                super.onCreate(db);
+                Log.d(TAG, "Database created. Fetching users...");
+                // Fetch users from API and populate the database when it is created
+                fetchUsers(1);
+            }
+            @Override
+            public void onOpen(@NonNull SupportSQLiteDatabase db) {
+                super.onOpen(db);
+                Log.d(TAG, "Database opened.");
+                // Optionally perform actions every time the database is opened
+            }
+        };
+        // Build the Room database instance
+        UsersDatabase usersDatabase = Room.databaseBuilder(application, UsersDatabase.class, "users_database")
+                .addCallback(myCallback)
+                .build();
+        // Get DAO instance for user operations
+        userDAO = usersDatabase.getUserDAO();
+        // Initialize LiveData
+        allUsers = userDAO.getAllUsers(); // Assuming this returns LiveData<List<User>>
 
-                        // Fetch the next page recursively
-                        fetchUsersFromApi(page + 1);
+    }
+    // Fetch users from the API and save them to the local database
+    private void fetchUsers(int page) {
+        Log.d(TAG, "Fetching users from page: " + page);
+        usersApiService.getUsers(page).enqueue(new Callback<UserResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<UserResponse> call, @NonNull Response<UserResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<User> users = response.body().getData();
+                    Log.d(TAG, "Received " + users.size() + " users from API.");
+                    if (!users.isEmpty()) {
+                        // Insert users into the database
+                        for (User user : users) {
+                            addUser(user);
+                        }
+                        // Fetch next page of users
+                        fetchUsers(page + 1);
                     }
+                    return;
                 }
+                Log.e(TAG, "Failed to get users. Response not successful.");
             }
 
             @Override
-            public void onFailure(Call<UserListResponse> call, Throwable t) {
-                // Handle failure, possibly show a message to the user
+            public void onFailure(Call<UserResponse> call, Throwable t) {
+                Log.e(TAG, "Failed to fetch users from API", t);
             }
         });
     }
-
-    // Retrieve LiveData object for observing the user list
-    public LiveData<List<UserEntity>> getUserListLiveData() {
-        return userListLiveData;
-    }
-    // Convert API User to Entity User and insert into Room database
-    private void insertUsers(List<User> users) {
-        for (User user : users) {
-            this.insertUser(user);
-        }
-    }
-    private void insertUser(User user){
-        UserEntity userEntity = new UserEntity(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getAvatar());
-        // Insert into the database
-        userCRUD.insert(userEntity);
+    // Add user in the background and show a Toast message on the main thread
+    public void addUser(User user) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+        executor.execute(() -> {
+            Log.d(TAG, "Adding user: " + user.toString());
+            userDAO.addUser(user);
+            handler.post(() -> {
+                Toast.makeText(application, "User added successfully", Toast.LENGTH_SHORT).show();
+            });
+        });
     }
 
-    // CRUD Operations for adding, updating, and deleting users
-    public void addUser(UserEntity userEntity) {
-        new Thread(() -> {
-            userCRUD.insert(userEntity);
-
-            // Fetch updated users from the database and update LiveData
-            List<UserEntity> allUsers = userCRUD.getAllUsers();
-            userListLiveData.postValue(allUsers);
-        }).start();
+    // Retrieve all users from the local database
+    public LiveData<List<User>> getUsers() {
+        Log.d(TAG, "Retrieving all users.");
+        return allUsers;
     }
 
-    public void updateUser(UserEntity userEntity) {
-        new Thread(() -> {
-            userCRUD.update(userEntity);
-
-            // Fetch updated users from the database and update LiveData
-            List<UserEntity> allUsers = userCRUD.getAllUsers();
-            userListLiveData.postValue(allUsers);
-        }).start();
+    // Delete a user from the local database
+    public void deleteUser(User user) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            Log.d(TAG, "Deleting user: " + user.toString());
+            userDAO.deleteUser(user);
+        });
     }
 
-    public void deleteUser(UserEntity userEntity) {
-        new Thread(() -> {
-            userCRUD.delete(userEntity);
+    // Update user details in the local database
+    public void updateUser(User user) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            Log.d(TAG, "Updating user: " + user.toString());
+            userDAO.updateUser(user);
+        });
+    }
 
-            // Fetch updated users from the database and update LiveData
-            List<UserEntity> allUsers = userCRUD.getAllUsers();
-            userListLiveData.postValue(allUsers);
-        }).start();
+    // Retrieve a user by ID from the local database
+    public LiveData<User> getUserById(int id) {
+        Log.d(TAG, "Retrieving user by ID: " + id);
+        return userDAO.getUserById(id);
     }
 }

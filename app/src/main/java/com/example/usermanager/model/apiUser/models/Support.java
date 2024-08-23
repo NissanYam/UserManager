@@ -1,12 +1,7 @@
 package com.example.usermanager.model.apiUser.models;
-
-import com.google.gson.annotations.SerializedName;
-
 public class Support {
-    @SerializedName("url")
     private String url;
 
-    @SerializedName("text")
     private String text;
 
     public String getText() {

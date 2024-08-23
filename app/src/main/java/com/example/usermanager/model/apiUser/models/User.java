@@ -1,63 +1,82 @@
 package com.example.usermanager.model.apiUser.models;
-import com.google.gson.annotations.SerializedName;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "users")
 public class User {
-    @SerializedName("id")
+    @ColumnInfo(name = "id")
+    @PrimaryKey
     private int id;
-
-    @SerializedName("email")
+    @ColumnInfo(name = "email")
     private String email;
-
-    @SerializedName("first_name")
-    private String firstName;
-
-    @SerializedName("last_name")
-    private String lastName;
-
-    @SerializedName("avatar")
+    @ColumnInfo(name = "first_name")
+    private String first_name;
+    @ColumnInfo(name = "last_name")
+    private String last_name;
+    @ColumnInfo(name = "avatar")
     private String avatar;
+
+    public User() {
+    }
+    public User(String avatar, String email, String first_name, int id, String last_name) {
+        this.avatar = avatar;
+        this.email = email;
+        this.first_name = first_name;
+        this.id = id;
+        this.last_name = last_name;
+    }
+
 
     public String getAvatar() {
         return avatar;
     }
 
-    public User setAvatar(String avatar) {
+    public void setAvatar(String avatar) {
         this.avatar = avatar;
-        return this;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public User setEmail(String email) {
+    public void setEmail(String email) {
         this.email = email;
-        return this;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public User setFirstName(String firstName) {
-        this.firstName = firstName;
-        return this;
     }
 
     public int getId() {
         return id;
     }
 
-    public User setId(int id) {
+    public void setId(int id) {
         this.id = id;
-        return this;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getFirst_name() {
+        return first_name;
     }
 
-    public User setLastName(String lastName) {
-        this.lastName = lastName;
-        return this;
+    public void setFirst_name(String first_name) {
+        this.first_name = first_name;
+    }
+
+    public String getLast_name() {
+        return last_name;
+    }
+
+    public void setLast_name(String last_name) {
+        this.last_name = last_name;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "avatar='" + avatar + '\'' +
+                ", id=" + id +
+                ", email='" + email + '\'' +
+                ", first_name='" + first_name + '\'' +
+                ", last_name='" + last_name + '\'' +
+                '}';
     }
 }

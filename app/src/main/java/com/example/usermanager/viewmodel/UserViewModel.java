@@ -1,40 +1,57 @@
 package com.example.usermanager.viewmodel;
 
+import android.app.Application;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModel;
 
-import com.example.usermanager.model.db.entitys.UserEntity;
+import com.example.usermanager.model.apiUser.models.User;
 import com.example.usermanager.model.repository.UserRepository;
 
 import java.util.List;
 
-public class UserViewModel extends ViewModel {
-    private UserRepository userRepository;
-    private LiveData<List<UserEntity>> userListLiveData;
+public class UserViewModel extends AndroidViewModel {
+    private static final String TAG = "UserViewModel";  // Log tag
+    private UserRepository repository;
+    private LiveData<List<User>> allUsers;
 
-    public UserViewModel(UserRepository repository) {
-        this.userRepository = repository;
-        this.userListLiveData = userRepository.getUserListLiveData();
-    }
-    // Fetch users from API
-    public void fetchUsersFromApi() {
-        userRepository.fetchUsersFromApi(1); // Start fetching from page 1
-    }// Get the LiveData for observing the user list
-    public LiveData<List<UserEntity>> getUserListLiveData() {
-        return userListLiveData;
+    public UserViewModel(@NonNull Application application) {
+        super(application);
+        Log.d(TAG, "UserViewModel created");
+        repository = new UserRepository(application);
+        allUsers = repository.getUsers();
     }
 
-    // CRUD Operations
-    public void addUser(UserEntity userEntity) {
-        userRepository.addUser(userEntity);
+    public LiveData<List<User>> getAllUsers() {
+        Log.d(TAG, "getAllUsers called");
+        return allUsers;
     }
 
-    public void updateUser(UserEntity userEntity) {
-        userRepository.updateUser(userEntity);
+    public void addUser(User user){
+        Log.d(TAG, "addUser called with user: " + user.toString());
+        repository.addUser(user);
     }
 
-    public void deleteUser(UserEntity userEntity) {
-        userRepository.deleteUser(userEntity);
+    public void deleteUser(User user){
+        Log.d(TAG, "deleteUser called with user: " + user.toString());
+        repository.deleteUser(user);
+    }
+
+    public void updateUser(User user){
+        Log.d(TAG, "updateUser called with user: " + user.toString());
+        repository.updateUser(user);
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        Log.d(TAG, "UserViewModel cleared");
+    }
+
+    public User getUserById(int id) {
+        Log.d(TAG, "getUserById called with id: " + id);
+        return repository.getUserById(id).getValue();
     }
 }
