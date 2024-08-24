@@ -63,7 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="0.8"
-                android:text="Nissan Yamin"
+                android:text="User full name"
                 android:fontFamily="@font/georgia"
                 android:gravity="center_vertical"
                 android:textSize="25sp"/>
@@ -74,7 +74,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="0.6"
                 android:textSize="14sp"
-                android:text="Nissanyam1@gmail.com"
+                android:text="User email"
                 android:gravity="center_vertical"
                 android:fontFamily="@font/varela_round_regular"/>
 
@@ -98,7 +98,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:textSize="14sp"
-                    android:text="208590281"
+                    android:text="User ID"
                     android:gravity="center_vertical"
                     android:fontFamily="@font/varela_round_regular"/>
             </androidx.appcompat.widget.LinearLayoutCompat>

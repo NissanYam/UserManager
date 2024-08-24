@@ -45,7 +45,8 @@ public class UserRepository {
             public void onCreate(@NonNull SupportSQLiteDatabase db) {
                 super.onCreate(db);
                 Log.d(TAG, "Database created. Fetching users...");
-                fetchUsers(1);
+                // Fetch users from the API and add them to the databas
+                 fetchUsers(1);
             }
             @Override
             public void onOpen(@NonNull SupportSQLiteDatabase db) {
@@ -60,6 +61,7 @@ public class UserRepository {
         allUsers = userDAO.getAllUsers();
     }
 
+    // Singleton pattern to ensure only one instance of the repository is created
     public static UserRepository getInstance(Application application) {
         if (instance == null) {
             synchronized (LOCK) {
@@ -83,19 +85,35 @@ public class UserRepository {
                         for (User user : users) {
                             addUser(user);
                         }
-                        fetchUsers(page + 1);
+                        fetchUsers(page + 1);  // Fetch the next page of users
                     }
-                    return;
+                } else {
+                    // Handle HTTP error responses (e.g., 404, 500)
+                    Log.e(TAG, "Server returned an error: " + response.code() + " " + response.message());
+                    showToast("Server error: " + response.code() + " " + response.message());
                 }
-                Log.e(TAG, "Failed to get users. Response not successful.");
             }
 
             @Override
-            public void onFailure(Call<UserResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<UserResponse> call, @NonNull Throwable t) {
+                // Handle network or other call-related failures (e.g., timeout, no connectivity)
                 Log.e(TAG, "Failed to fetch users from API", t);
+                if (t instanceof java.net.SocketTimeoutException) {
+                    showToast("Request timed out. Please try again.");
+                } else if (t instanceof java.net.UnknownHostException) {
+                    showToast("No internet connection. Please check your network.");
+                } else {
+                    showToast("Failed to load users. Please try again later.");
+                }
             }
         });
     }
+
+    private void showToast(String message) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() -> Toast.makeText(application, message, Toast.LENGTH_SHORT).show());
+    }
+
 
     public void addUser(User user) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
