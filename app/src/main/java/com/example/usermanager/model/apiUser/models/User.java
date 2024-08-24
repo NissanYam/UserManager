@@ -18,8 +18,10 @@ public class User {
     @ColumnInfo(name = "avatar")
     private String avatar;
 
+
     public User() {
     }
+    @Ignore
     public User(String avatar, String email, String first_name, int id, String last_name) {
         this.avatar = avatar;
         this.email = email;

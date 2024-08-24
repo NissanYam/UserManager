@@ -91,7 +91,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onUserEdit(User user) {
         if (user != null) {
-            Log.d("MainActivity", "User edited: " + user.getFirst_name() + " " + user.getLast_name());
+            Log.d("MainActivity", "User edit: " + user.getFirst_name() + " " + user.getLast_name());
+            addUserButton.setVisibility(View.GONE);
             addUserFragment.setUser(user);
             loadFragment(addUserFragment, R.id.fragment_user);
         }
