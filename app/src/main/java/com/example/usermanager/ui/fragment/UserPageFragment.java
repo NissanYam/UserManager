@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,6 +24,15 @@ public class UserPageFragment extends Fragment {
     private TextView userFullNameTV, userEmailTV, userIdTV;
     private UserViewModel userViewModel;
     private User currentUser;
+    private ImageButton editButton;
+    private OnUserEditListener onUserEditListener;
+
+    public interface OnUserEditListener {
+        void onUserEdit(User user);
+    }
+    public void setOnUserEditListener(OnUserEditListener listener) {
+        onUserEditListener = listener;
+    }
 
     @Nullable
     @Override
@@ -34,6 +44,13 @@ public class UserPageFragment extends Fragment {
         userFullNameTV = view.findViewById(R.id.user_full_name);
         userEmailTV = view.findViewById(R.id.user_email);
         userIdTV = view.findViewById(R.id.user_id);
+        editButton = view.findViewById(R.id.btn_edit);
+        editButton.setOnClickListener(v -> {
+            // Handle edit button click
+            if (onUserEditListener != null) {
+                onUserEditListener.onUserEdit(currentUser);
+            }
+        });
         return view;
     }
 

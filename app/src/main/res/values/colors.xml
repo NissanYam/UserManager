@@ -2,6 +2,6 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="blue_dark">#2196F3</color> <!-- Dark blue for the toolbar -->
-    <color name="blue_light">#E3F2FD</color> <!-- Light blue for the background -->
+    <color name="blue_dark">#B0B0B0</color>
+    <color name="blue_light">#E3F2FD</color>
 </resources>

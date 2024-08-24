@@ -1,53 +1,71 @@
 package com.example.usermanager.ui.activity;
+
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.example.usermanager.R;
 import com.example.usermanager.model.apiUser.models.User;
 import com.example.usermanager.ui.fragment.AddUserFragment;
 import com.example.usermanager.ui.fragment.UserListFragment;
 import com.example.usermanager.ui.fragment.UserPageFragment;
 import com.example.usermanager.viewmodel.UserViewModel;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import android.util.Log;
-import android.view.View;
+public class MainActivity extends AppCompatActivity
+        implements UserListFragment.OnUserSelectedListener,
+        AddUserFragment.OnUserAddListener,
+        UserPageFragment.OnUserEditListener {
 
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-
-public class MainActivity extends AppCompatActivity implements UserListFragment.OnUserSelectedListener, AddUserFragment.OnUserAddListener {
-    FloatingActionButton addUserButton;
-    UserListFragment userListFragment;
-    UserPageFragment userPageFragment;
-    AddUserFragment addUserFragment;
-    UserViewModel userViewModel;
+    private ImageButton addUserButton;
+    private UserListFragment userListFragment;
+    private UserPageFragment userPageFragment;
+    private AddUserFragment addUserFragment;
+    private UserViewModel userViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // Initialize UI elements
+
+        initializeUI();
+        initializeViewModel();
+        initializeFragments();
+        setFragmentListeners();
+        loadInitialFragments();
+    }
+
+    private void initializeUI() {
         addUserButton = findViewById(R.id.add_user_button);
-        // Initialize view model
+        addUserButton.setOnClickListener(view -> {
+            addUserButton.setVisibility(View.GONE);
+            loadFragment(addUserFragment, R.id.fragment_user);
+        });
+    }
+
+    private void initializeViewModel() {
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
-        // Initialize fragments
+    }
+
+    private void initializeFragments() {
         userListFragment = new UserListFragment();
         userPageFragment = new UserPageFragment();
         addUserFragment = new AddUserFragment();
-        // Set listeners
+    }
+
+    private void setFragmentListeners() {
         userListFragment.setOnUserSelectedListener(this);
         addUserFragment.setOnUserAddListener(this);
-        // Load the initial fragment
+        userPageFragment.setOnUserEditListener(this);
+    }
+
+    private void loadInitialFragments() {
         loadFragment(userListFragment, R.id.fragment_users_list);
         loadFragment(userPageFragment, R.id.fragment_user);
-
-        addUserButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addUserButton.setVisibility(View.GONE);
-                loadFragment(addUserFragment, R.id.fragment_user);
-            }
-        });
     }
 
     private void loadFragment(Fragment fragment, int containerId) {
@@ -56,19 +74,32 @@ public class MainActivity extends AppCompatActivity implements UserListFragment.
                 .commit();
     }
 
+    private void setAddUserButtonVisibility(boolean isVisible) {
+        addUserButton.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
+
     @Override
     public void onUserSelected(User user) {
         if (user != null) {
             Log.d("MainActivity", "User selected: " + user.getFirst_name() + " " + user.getLast_name());
-            loadFragment(this.userPageFragment, R.id.fragment_user);
+            loadFragment(userPageFragment, R.id.fragment_user);
             userPageFragment.setUser(user);
+            setAddUserButtonVisibility(true);
         }
     }
 
     @Override
-    public void OnUserAddListener(User user) {
+    public void onUserEdit(User user) {
+        if (user != null) {
+            Log.d("MainActivity", "User edited: " + user.getFirst_name() + " " + user.getLast_name());
+            addUserFragment.setUser(user);
+            loadFragment(addUserFragment, R.id.fragment_user);
+        }
+    }
+
+    @Override
+    public void onUserAdd(User user) {
         Log.d("MainActivity", "User added: " + user.getFirst_name() + " " + user.getLast_name());
-        addUserButton.setVisibility(View.VISIBLE);
         onUserSelected(user);
     }
 }

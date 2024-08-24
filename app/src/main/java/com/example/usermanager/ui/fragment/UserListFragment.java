@@ -9,18 +9,32 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.usermanager.R;
 import com.example.usermanager.model.apiUser.models.User;
+import com.example.usermanager.ui.adapter.SwipeToDeleteCallback;
 import com.example.usermanager.ui.adapter.UserCardAdapter;
 import com.example.usermanager.viewmodel.UserViewModel;
-public class UserListFragment extends Fragment{
+public class UserListFragment extends Fragment implements UserCardAdapter.OnUserClickListener, UserCardAdapter.OnUserSwipedListener {
 
     private RecyclerView recyclerView;
     private UserCardAdapter adapter;
     private UserViewModel userViewModel;
     private OnUserSelectedListener listener;
+
+    @Override
+    public void onUserClick(User user) {
+        if (listener != null) {
+            listener.onUserSelected(user);
+        }
+    }
+
+    @Override
+    public void onUserSwiped(User user) {
+        this.userViewModel.deleteUser(user);
+    }
 
 
     // Define an interface for the listener
@@ -46,16 +60,14 @@ public class UserListFragment extends Fragment{
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Initialize adapter with the listener
-        adapter = new UserCardAdapter(user -> {
-            // Handle user click by notifying the listener
-            if (listener != null) {
-                listener.onUserSelected(user);
-            }
-        });
+        adapter = new UserCardAdapter(this,this);
         recyclerView.setAdapter(adapter);
 
         // Observe user data from ViewModel in onCreateView
         observeUserData();
+        // Create and attach ItemTouchHelper for swipe-to-delete functionality
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter));
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         return view;
     }

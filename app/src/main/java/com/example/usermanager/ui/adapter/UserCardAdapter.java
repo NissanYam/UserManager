@@ -17,13 +17,15 @@ import com.example.usermanager.model.apiUser.models.User;
 import java.util.Collections;
 import java.util.List;
 
-public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserViewHolder> {
+public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserViewHolder> implements ItemTouchHelperAdapter{
 
     private List<User> userList;
     private final OnUserClickListener onUserClickListener;
+    private OnUserSwipedListener onUserSwipedListener;
 
-    public UserCardAdapter(OnUserClickListener onUserClickListener) {
+    public UserCardAdapter(OnUserClickListener onUserClickListener, OnUserSwipedListener onUserSwipedListener) {
         this.onUserClickListener = onUserClickListener;
+        this.onUserSwipedListener = onUserSwipedListener;
     }
 
     @NonNull
@@ -45,6 +47,8 @@ public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserVi
         return (userList != null) ? userList.size() : 0;
     }
 
+
+
     public void setUserList(List<User> newUserList) {
         if (newUserList == null) {
             newUserList = Collections.emptyList();
@@ -58,10 +62,19 @@ public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserVi
         diffResult.dispatchUpdatesTo(this);
     }
 
-
+    @Override
+    public void onItemSwiped(int position) {
+        User user = userList.get(position);
+        userList.remove(position);
+        notifyItemRemoved(position);
+        onUserSwipedListener.onUserSwiped(user);
+    }
 
     public interface OnUserClickListener {
         void onUserClick(User user);
+    }
+    public interface OnUserSwipedListener {
+        void onUserSwiped(User user);
     }
     class UserViewHolder extends RecyclerView.ViewHolder {
         ImageView userAvatar;
