@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity
         initializeFragments();
         setFragmentListeners();
         loadInitialFragments();
-        generateAndAddRandomUsers();
+        generateAndAddRandomUsers(); //TODO:Remove!
     }
 
     private void generateAndAddRandomUsers() {
