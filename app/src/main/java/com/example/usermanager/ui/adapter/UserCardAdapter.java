@@ -14,18 +14,29 @@ import com.bumptech.glide.Glide;
 import com.example.usermanager.R;
 import com.example.usermanager.model.apiUser.models.User;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserViewHolder> implements ItemTouchHelperAdapter{
 
     private List<User> userList;
+    private Map<Integer, User> userMap;
     private final OnUserClickListener onUserClickListener;
     private OnUserSwipedListener onUserSwipedListener;
 
-    public UserCardAdapter(OnUserClickListener onUserClickListener, OnUserSwipedListener onUserSwipedListener) {
+    public UserCardAdapter(OnUserClickListener onUserClickListener,
+                           OnUserSwipedListener onUserSwipedListener,
+                           List<User> userList) {
         this.onUserClickListener = onUserClickListener;
         this.onUserSwipedListener = onUserSwipedListener;
+        this.userList = userList != null ? userList : new ArrayList<>();
+        this.userMap = new HashMap<>();
+        for (User user : this.userList) {
+            userMap.put(user.getId(), user); // Initialize the map with existing users
+        }
     }
 
     @NonNull
@@ -49,19 +60,32 @@ public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserVi
 
 
 
-    public void setUserList(List<User> newUserList) {
-        if (newUserList == null) {
-            newUserList = Collections.emptyList();
+    public void addUsers(List<User> newUserList) {
+        if (newUserList == null || newUserList.isEmpty()) {
+            return;
         }
+
         if (this.userList == null) {
-            this.userList = Collections.emptyList();
+            this.userList = new ArrayList<>();
         }
 
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new UserDiffCallback(this.userList, newUserList));
-        this.userList = newUserList;
-        diffResult.dispatchUpdatesTo(this);
-    }
+        for (User user : newUserList) {
+            if (userMap.containsKey(user.getId())) {
+                // Update the existing user
+                int index = this.userList.indexOf(userMap.get(user.getId()));
+                if (index != -1) {
+                    this.userList.set(index, user);
+                }
+            } else {
+                // Add new user
+                this.userList.add(user);
+            }
+            // Update the map with the latest user data
+            userMap.put(user.getId(), user);
+        }
 
+        notifyDataSetChanged(); // Notify the adapter that the data has changed
+    }
     @Override
     public void onItemSwiped(int position) {
         User user = userList.get(position);

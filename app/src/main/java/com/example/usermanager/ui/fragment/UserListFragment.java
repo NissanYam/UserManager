@@ -2,12 +2,14 @@ package com.example.usermanager.ui.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,10 +19,14 @@ import com.example.usermanager.model.apiUser.models.User;
 import com.example.usermanager.ui.adapter.SwipeToDeleteCallback;
 import com.example.usermanager.ui.adapter.UserCardAdapter;
 import com.example.usermanager.viewmodel.UserViewModel;
+
+import java.util.List;
+
 public class UserListFragment extends Fragment implements UserCardAdapter.OnUserClickListener, UserCardAdapter.OnUserSwipedListener {
 
     private RecyclerView recyclerView;
     private UserCardAdapter adapter;
+    private int currentPageNumber = 0;
     private UserViewModel userViewModel;
     private OnUserSelectedListener listener;
 
@@ -46,8 +52,6 @@ public class UserListFragment extends Fragment implements UserCardAdapter.OnUser
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize ViewModel, shared with the activity
-        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
     }
 
     @Nullable
@@ -55,34 +59,69 @@ public class UserListFragment extends Fragment implements UserCardAdapter.OnUser
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_user_list, container, false);
 
-        // Initialize RecyclerView
-        recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Initialize adapter with the listener
-        adapter = new UserCardAdapter(this,this);
-        recyclerView.setAdapter(adapter);
-
-        // Observe user data from ViewModel in onCreateView
-        observeUserData();
-        // Create and attach ItemTouchHelper for swipe-to-delete functionality
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter));
-        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         return view;
     }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        observeUserData();
-    }
+        // Initialize ViewModel, shared with the activity
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        // Initialize RecyclerView
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-    private void observeUserData() {
-        userViewModel.getAllUsers().observe(getViewLifecycleOwner(), users -> {
-            if (users != null) {
-                adapter.setUserList(users);
+        // Initialize adapter with the listener
+        adapter = new UserCardAdapter(this,this, null);
+        recyclerView.setAdapter(adapter);
+
+        loadUsers(currentPageNumber);
+
+        // Create and attach ItemTouchHelper for swipe-to-delete functionality
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter));
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
+        // Setup scroll listener for pagination
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager != null) {
+                    // Check if scrolling up and we are at the top of the list
+                    if (dy < 0 && layoutManager.findFirstCompletelyVisibleItemPosition() == 0) {
+                        // Load previous data if currentPageNumber is not less than 0
+                        if (currentPageNumber > 0) {
+                            loadUsers(currentPageNumber);
+                            currentPageNumber--;
+                            Log.d("UserFragment", "Loading previous data..." + currentPageNumber);
+                        }
+                    }
+
+                    // Check if scrolling down and we are at the bottom of the list
+                    if (dy > 0 && layoutManager.findLastCompletelyVisibleItemPosition() == adapter.getItemCount() - 1) {
+                        // Load more data
+                        loadUsers(currentPageNumber);
+                        currentPageNumber++;
+                        Log.d("UserFragment", "Loading more data..." + currentPageNumber);
+                    }
+                }
+            }
+        });
+
+    }
+    private void loadUsers(int page) {
+        userViewModel.getUsersByPagination(page).observe(getViewLifecycleOwner(), users -> {
+            if (users != null && !users.isEmpty()) {
+                Log.d("UserFragment", "Loaded users: " + users.size());
+                adapter.addUsers(users);
                 if (listener != null && !users.isEmpty()) {
-                    listener.onUserSelected(users.get(0));
+                    int rand = (int) (Math.random() * users.size());
+                    listener.onUserSelected(users.get(rand));
+                }else {
+                    Log.e("UserFragment", "Error loading users");
                 }
             }
         });

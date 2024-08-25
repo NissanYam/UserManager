@@ -3,6 +3,7 @@ package com.example.usermanager.ui.fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.TextKeyListener;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -138,6 +139,12 @@ public class AddUserFragment extends Fragment {
         firstNameInput.setText("");
         idInput.setText("");
         lastNameInput.setText("");
+
+        // Make idInput editable again
+        idInput.setFocusable(true); // Allow focus
+        idInput.setClickable(true); // Allow clicks
+        idInput.setLongClickable(true); // Allow long clicks (e.g., copy/paste)
+        idInput.setCursorVisible(true); // Show the cursor
     }
 
     private void handleAvatarUrlChange(String avatarUrl) {
@@ -166,6 +173,15 @@ public class AddUserFragment extends Fragment {
             emailInput.setText(user.getEmail());
             idInput.setText(String.valueOf(user.getId()));
             avatarUrlInput.setText(user.getAvatar());
+
+            // Make idInput non-editable after setting its text
+            idInput.setFocusable(false); // Prevent focus
+            idInput.setClickable(false); // Prevent clicks
+            idInput.setLongClickable(false); // Prevent long clicks (e.g., copy/paste)
+            idInput.setCursorVisible(false); // Hide the cursor
+            idInput.setKeyListener(null); // Disable keyboard input
+
+
             Glide.with(this)
                     .load(user.getAvatar())
                     .placeholder(R.drawable.ic_user_placeholder)

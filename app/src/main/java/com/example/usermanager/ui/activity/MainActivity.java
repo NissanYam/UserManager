@@ -93,8 +93,9 @@ public class MainActivity extends AppCompatActivity
         if (user != null) {
             Log.d("MainActivity", "User edit: " + user.getFirst_name() + " " + user.getLast_name());
             addUserButton.setVisibility(View.GONE);
-            addUserFragment.setUser(user);
+
             loadFragment(addUserFragment, R.id.fragment_user);
+            addUserFragment.setUser(user);
         }
     }
 

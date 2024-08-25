@@ -33,7 +33,6 @@ public class UserRepository {
     private final Application application;
     private final UsersApiService usersApiService;
     private final UserDAO userDAO;
-    private LiveData<List<User>> allUsers;
     private static final Object LOCK = new Object();
 
     private UserRepository(Application application) {
@@ -58,7 +57,6 @@ public class UserRepository {
                 .addCallback(myCallback)
                 .build();
         userDAO = usersDatabase.getUserDAO();
-        allUsers = userDAO.getAllUsers();
     }
 
     // Singleton pattern to ensure only one instance of the repository is created
@@ -127,9 +125,10 @@ public class UserRepository {
         });
     }
 
-    public LiveData<List<User>> getUsers() {
-        Log.d(TAG, "Retrieving all users.");
-        return allUsers;
+
+    public LiveData<List<User>> getUsersByPagination(int limit, int offset) {
+        Log.d(TAG, "Retrieving users by pagination. Limit: " + limit + ", Offset: " + offset);
+        return userDAO.getUsersByPagination(limit, offset);
     }
 
     public void deleteUser(User user) {

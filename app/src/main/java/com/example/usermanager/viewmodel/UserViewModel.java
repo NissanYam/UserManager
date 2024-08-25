@@ -16,17 +16,18 @@ public class UserViewModel extends AndroidViewModel {
     private static final String TAG = "UserViewModel";  // Log tag
     private UserRepository repository;
     private LiveData<List<User>> allUsers;
+    private static final int PAGE_SIZE = 10; // Define your page size
 
     public UserViewModel(@NonNull Application application) {
         super(application);
         Log.d(TAG, "UserViewModel created");
         repository = UserRepository.getInstance(application);
-        allUsers = repository.getUsers();
     }
 
-    public LiveData<List<User>> getAllUsers() {
-        Log.d(TAG, "getAllUsers called");
-        return allUsers;
+    public LiveData<List<User>> getUsersByPagination(int page) {
+        Log.d(TAG, "getUsersByPagination called with page: " + page);
+        int offset = page * PAGE_SIZE;
+        return repository.getUsersByPagination(PAGE_SIZE, offset);
     }
 
     public void addUser(User user){
