@@ -30,5 +30,8 @@ public interface UserDAO {
     @Query("SELECT * FROM users WHERE id = :id")
     public LiveData<User> getUserById(int id);
 
+    @Query("SELECT * FROM users LIMIT :limit OFFSET :offset")
+    public LiveData<List<User>> getUsersByPagination(int limit, int offset);
+
 }
 
