@@ -16,22 +16,22 @@ import java.util.List;
 public interface UserDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void addUser(User user);
+    void addUser(User user);
 
     @Update
-    public void updateUser(User user);
+    void updateUser(User user);
 
     @Delete
-    public void deleteUser(User user);
+    void deleteUser(User user);
 
     @Query("SELECT * FROM users")
-    public LiveData<List<User>> getAllUsers();
+    LiveData<List<User>> getAllUsers();
 
     @Query("SELECT * FROM users WHERE id = :id")
-    public LiveData<User> getUserById(int id);
+    LiveData<User> getUserById(int id);
 
     @Query("SELECT * FROM users LIMIT :limit OFFSET :offset")
-    public LiveData<List<User>> getUsersByPagination(int limit, int offset);
+    LiveData<List<User>> getUsersByPagination(int limit, int offset);
 
 }
 

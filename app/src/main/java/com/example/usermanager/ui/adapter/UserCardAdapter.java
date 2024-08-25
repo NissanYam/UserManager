@@ -7,7 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -15,7 +14,6 @@ import com.example.usermanager.R;
 import com.example.usermanager.model.apiUser.models.User;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,21 +21,9 @@ import java.util.Map;
 public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserViewHolder> implements ItemTouchHelperAdapter{
 
     private List<User> userList;
-    private Map<Integer, User> userMap;
+    private final Map<Integer, User> userMap;
     private final OnUserClickListener onUserClickListener;
-    private OnUserSwipedListener onUserSwipedListener;
-
-    public UserCardAdapter(OnUserClickListener onUserClickListener,
-                           OnUserSwipedListener onUserSwipedListener,
-                           List<User> userList) {
-        this.onUserClickListener = onUserClickListener;
-        this.onUserSwipedListener = onUserSwipedListener;
-        this.userList = userList != null ? userList : new ArrayList<>();
-        this.userMap = new HashMap<>();
-        for (User user : this.userList) {
-            userMap.put(user.getId(), user); // Initialize the map with existing users
-        }
-    }
+    private final OnUserSwipedListener onUserSwipedListener;
 
     @NonNull
     @Override
@@ -58,7 +44,17 @@ public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserVi
         return (userList != null) ? userList.size() : 0;
     }
 
-
+    public UserCardAdapter(OnUserClickListener onUserClickListener,
+                           OnUserSwipedListener onUserSwipedListener,
+                           List<User> userList) {
+        this.onUserClickListener = onUserClickListener;
+        this.onUserSwipedListener = onUserSwipedListener;
+        this.userList = userList != null ? userList : new ArrayList<>();
+        this.userMap = new HashMap<>();
+        for (User user : this.userList) {
+            userMap.put(user.getId(), user); // Initialize the map with existing users
+        }
+    }
 
     public void addUsers(List<User> newUserList) {
         if (newUserList == null || newUserList.isEmpty()) {
@@ -75,16 +71,16 @@ public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserVi
                 int index = this.userList.indexOf(userMap.get(user.getId()));
                 if (index != -1) {
                     this.userList.set(index, user);
+                    notifyItemChanged(index); // Notify that an item has changed
                 }
             } else {
                 // Add new user
                 this.userList.add(user);
+                notifyItemInserted(this.userList.size() - 1); // Notify that a new item was added
             }
             // Update the map with the latest user data
             userMap.put(user.getId(), user);
         }
-
-        notifyDataSetChanged(); // Notify the adapter that the data has changed
     }
     @Override
     public void onItemSwiped(int position) {
@@ -100,9 +96,9 @@ public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserVi
     public interface OnUserSwipedListener {
         void onUserSwiped(User user);
     }
-    class UserViewHolder extends RecyclerView.ViewHolder {
+    public class UserViewHolder extends RecyclerView.ViewHolder {
         ImageView userAvatar;
-        TextView userFullName, userEmail, favouriteTag;
+        TextView userFullName, userEmail;
 
         UserViewHolder(View itemView) {
             super(itemView);
@@ -112,16 +108,19 @@ public class UserCardAdapter extends RecyclerView.Adapter<UserCardAdapter.UserVi
         }
 
         void bind(User user) {
-            userFullName.setText(user.getFirst_name() + " " + user.getLast_name());
-            userEmail.setText(user.getEmail());
+            if (user != null)
+            {
+                userFullName.setText(String.format("%s %s", user.getFirst_name(), user.getLast_name()));
+                userEmail.setText(user.getEmail());
 
-            Glide.with(itemView.getContext())
-                    .load(user.getAvatar())
-                    .placeholder(R.drawable.ic_user_placeholder)
-                    .into(userAvatar);
+                Glide.with(itemView.getContext())
+                        .load(user.getAvatar())
+                        .placeholder(R.drawable.ic_user_placeholder)
+                        .into(userAvatar);
 
-            // Handle item click
-            itemView.setOnClickListener(v -> onUserClickListener.onUserClick(user));
+                // Handle item click
+                itemView.setOnClickListener(v -> onUserClickListener.onUserClick(user));
+            }
         }
     }
 }

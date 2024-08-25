@@ -24,7 +24,6 @@ public class UserPageFragment extends Fragment {
     private TextView userFullNameTV, userEmailTV, userIdTV;
     private UserViewModel userViewModel;
     private User currentUser;
-    private ImageButton editButton;
     private OnUserEditListener onUserEditListener;
 
     public interface OnUserEditListener {
@@ -44,7 +43,7 @@ public class UserPageFragment extends Fragment {
         userFullNameTV = view.findViewById(R.id.user_full_name);
         userEmailTV = view.findViewById(R.id.user_email);
         userIdTV = view.findViewById(R.id.user_id);
-        editButton = view.findViewById(R.id.btn_edit);
+        ImageButton editButton = view.findViewById(R.id.btn_edit);
         editButton.setOnClickListener(v -> {
             // Handle edit button click
             if (onUserEditListener != null) {
@@ -72,7 +71,7 @@ public class UserPageFragment extends Fragment {
     }
 
     private void loadUserData(User user) {
-        userFullNameTV.setText(user.getFirst_name() + " " + user.getLast_name());
+        userFullNameTV.setText(String.format("%s %s", user.getFirst_name(), user.getLast_name()));
         userEmailTV.setText(user.getEmail());
         userIdTV.setText(String.valueOf(user.getId()));
 

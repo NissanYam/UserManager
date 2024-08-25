@@ -6,10 +6,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,8 +20,6 @@ import com.example.usermanager.model.apiUser.models.User;
 import com.example.usermanager.ui.adapter.SwipeToDeleteCallback;
 import com.example.usermanager.ui.adapter.UserCardAdapter;
 import com.example.usermanager.viewmodel.UserViewModel;
-
-import java.util.List;
 
 public class UserListFragment extends Fragment implements UserCardAdapter.OnUserClickListener, UserCardAdapter.OnUserSwipedListener {
 
@@ -57,11 +56,7 @@ public class UserListFragment extends Fragment implements UserCardAdapter.OnUser
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_user_list, container, false);
-
-
-
-        return view;
+        return inflater.inflate(R.layout.fragment_user_list, container, false);
     }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -94,15 +89,19 @@ public class UserListFragment extends Fragment implements UserCardAdapter.OnUser
                     if (dy < 0 && layoutManager.findFirstCompletelyVisibleItemPosition() == 0) {
                         // Load previous data if currentPageNumber is not less than 0
                         if (currentPageNumber > 0) {
+                            Toast.makeText(getContext(), "Loading previous data...", Toast.LENGTH_SHORT).show();
                             loadUsers(currentPageNumber);
                             currentPageNumber--;
                             Log.d("UserFragment", "Loading previous data..." + currentPageNumber);
+                        } else {
+                            Toast.makeText(getContext(), "No more previous data.", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     // Check if scrolling down and we are at the bottom of the list
                     if (dy > 0 && layoutManager.findLastCompletelyVisibleItemPosition() == adapter.getItemCount() - 1) {
                         // Load more data
+                        Toast.makeText(getContext(), "Loading more data...", Toast.LENGTH_SHORT).show();
                         loadUsers(currentPageNumber);
                         currentPageNumber++;
                         Log.d("UserFragment", "Loading more data..." + currentPageNumber);
@@ -110,6 +109,7 @@ public class UserListFragment extends Fragment implements UserCardAdapter.OnUser
                 }
             }
         });
+
 
     }
     private void loadUsers(int page) {
@@ -135,10 +135,10 @@ public class UserListFragment extends Fragment implements UserCardAdapter.OnUser
         if (context instanceof OnUserSelectedListener) {
             listener = (OnUserSelectedListener) context;
         } else {
-            throw new ClassCastException(context.toString()
-                    + " must implement OnUserSelectedListener");
+            throw new ClassCastException(context + " must implement OnUserSelectedListener");
         }
     }
+
 
     @Override
     public void onDetach() {

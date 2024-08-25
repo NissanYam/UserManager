@@ -3,8 +3,6 @@ package com.example.usermanager.ui.fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.method.TextKeyListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,7 +78,7 @@ public class AddUserFragment extends Fragment {
     }
 
     private void setupSaveButtonClickListener() {
-        saveButton.setOnClickListener(view -> handleSaveButtonClick(view));
+        saveButton.setOnClickListener(this::handleSaveButtonClick);
     }
 
     private void setupAvatarUrlInputWatcher() {

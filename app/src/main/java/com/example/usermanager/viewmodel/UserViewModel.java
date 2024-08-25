@@ -14,8 +14,7 @@ import java.util.List;
 
 public class UserViewModel extends AndroidViewModel {
     private static final String TAG = "UserViewModel";  // Log tag
-    private UserRepository repository;
-    private LiveData<List<User>> allUsers;
+    private final UserRepository repository;
     private static final int PAGE_SIZE = 10; // Define your page size
 
     public UserViewModel(@NonNull Application application) {

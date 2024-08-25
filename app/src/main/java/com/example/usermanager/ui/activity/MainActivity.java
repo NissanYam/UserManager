@@ -15,6 +15,7 @@ import com.example.usermanager.ui.fragment.AddUserFragment;
 import com.example.usermanager.ui.fragment.UserListFragment;
 import com.example.usermanager.ui.fragment.UserPageFragment;
 import com.example.usermanager.viewmodel.UserViewModel;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity
         implements UserListFragment.OnUserSelectedListener,
@@ -37,12 +38,61 @@ public class MainActivity extends AppCompatActivity
         initializeFragments();
         setFragmentListeners();
         loadInitialFragments();
+        generateAndAddRandomUsers();
+    }
+
+    private void generateAndAddRandomUsers() {
+
+        Random random = new Random();
+
+        String[] firstNames = {"John", "Jane", "Alex", "Emily", "Chris", "Katie", "Michael", "Sarah", "David", "Laura"};
+        String[] lastNames = {"Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor"};
+        String[] avatars = {
+                "https://randomuser.me/api/portraits/men/1.jpg",
+                "https://randomuser.me/api/portraits/women/1.jpg",
+                "https://randomuser.me/api/portraits/men/2.jpg",
+                "https://randomuser.me/api/portraits/women/2.jpg",
+                "https://randomuser.me/api/portraits/men/3.jpg",
+                "https://randomuser.me/api/portraits/women/3.jpg",
+                "https://randomuser.me/api/portraits/men/4.jpg",
+                "https://randomuser.me/api/portraits/women/4.jpg",
+                "https://randomuser.me/api/portraits/men/5.jpg",
+                "https://randomuser.me/api/portraits/women/5.jpg",
+                "https://randomuser.me/api/portraits/men/6.jpg",
+                "https://randomuser.me/api/portraits/women/6.jpg",
+                "https://randomuser.me/api/portraits/men/7.jpg",
+                "https://randomuser.me/api/portraits/women/7.jpg",
+                "https://randomuser.me/api/portraits/men/8.jpg",
+                "https://randomuser.me/api/portraits/women/8.jpg",
+                "https://randomuser.me/api/portraits/men/9.jpg",
+                "https://randomuser.me/api/portraits/women/9.jpg",
+                "https://randomuser.me/api/portraits/men/10.jpg",
+                "https://randomuser.me/api/portraits/women/10.jpg"
+        };
+
+
+        for (int i = 0; i < 20; i++) {
+            String firstName = firstNames[random.nextInt(firstNames.length)];
+            String lastName = lastNames[random.nextInt(lastNames.length)];
+            String email = (firstName + "." + lastName + "@example.com").toLowerCase();
+            String avatar = avatars[random.nextInt(avatars.length)];
+
+            User user = new User();
+            user.setId(i + 20);  // Assuming ID starts from 1
+            user.setFirst_name(firstName);
+            user.setLast_name(lastName);
+            user.setEmail(email);
+            user.setAvatar(avatar);
+
+            Log.d("MainActivity", "Random user generated: " + user.getFirst_name() + " " + user.getLast_name());
+            userViewModel.addUser(user);
+        }
     }
 
     private void initializeUI() {
         addUserButton = findViewById(R.id.add_user_button);
         addUserButton.setOnClickListener(view -> {
-            addUserButton.setVisibility(View.GONE);
+            setAddUserButtonVisibility(false);
             loadFragment(addUserFragment, R.id.fragment_user);
         });
     }
@@ -92,8 +142,7 @@ public class MainActivity extends AppCompatActivity
     public void onUserEdit(User user) {
         if (user != null) {
             Log.d("MainActivity", "User edit: " + user.getFirst_name() + " " + user.getLast_name());
-            addUserButton.setVisibility(View.GONE);
-
+            setAddUserButtonVisibility(false);
             loadFragment(addUserFragment, R.id.fragment_user);
             addUserFragment.setUser(user);
         }
