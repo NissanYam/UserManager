@@ -8,7 +8,6 @@ This project is an Android application built to manage user data using the MVVM 
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Running the App](#running-the-app)
-- [Project Structure](#project-structure)
 - [Known Issues](#known-issues)
 - [Future Enhancements](#future-enhancements)
 
@@ -40,7 +39,7 @@ This project is an Android application built to manage user data using the MVVM 
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/UserManager.git
+    git clone https://github.com/NissanYam/UserManager.git
     ```
 
 2. **Open the project in Android Studio:**
@@ -64,26 +63,6 @@ This project is an Android application built to manage user data using the MVVM 
 3. **Testing CRUD operations:**
     - The app will fetch user data from the ReqRes API and display it in the RecyclerView.
     - You can add, update, or delete user data using the UI.
-## Project Structure
-
-The project is organized into the following packages:
-
-```plaintext
-com.yourusername.usermanager
-│
-├── data
-│   ├── api                # Retrofit setup and API service
-│   ├── db                 # Room database setup and DAO interfaces
-│   ├── model              # Data models (e.g., User class)
-│   └── repository         # Repositories for data handling
-│
-├── ui
-│   ├── adapter            # RecyclerView adapters
-│   ├── viewmodel          # ViewModels for data management
-│   └── activity           # UI activities
-│
-└── utils                  # Utility classes
-
 
 
 ## Known Issues
@@ -97,3 +76,35 @@ com.yourusername.usermanager
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+## Assumptions and Challenges
+
+### Assumptions
+
+1. **API Availability**: It is assumed that the ReqRes API is available and functional throughout the development and use of this application. Any changes or downtime in the API may affect the functionality of the app.
+   
+2. **Java Version**: The application assumes that Java 11 is installed and properly configured in the development environment. This is required for building and running the application.
+
+3. **Android SDK Version**: The app assumes that the Android SDK API level 30 or higher is installed. This is necessary to ensure compatibility with the features and dependencies used in the project.
+
+4. **Device Compatibility**: It is assumed that users will be running the application on devices or emulators that support the minimum SDK version (API level 30) specified in the `build.gradle` file.
+
+5. **Internet Connection**: The app assumes an active internet connection for fetching user data from the ReqRes API. Offline functionality is not supported in the current version.
+
+### Challenges
+
+1. **API Integration**: Integrating Retrofit with the ReqRes API involved handling various API responses and ensuring that the data is correctly mapped to the model classes. Dealing with different data formats and handling errors were significant challenges.
+
+2. **Room Database Setup**: Setting up the Room database and ensuring smooth data persistence and retrieval required careful design of the entity and DAO interfaces. Ensuring that data integrity was maintained across different operations posed a challenge.
+
+3. **RecyclerView Performance**: Implementing and optimizing the RecyclerView for smooth performance involved dealing with large datasets and ensuring that the UI remained responsive. Efficient view recycling and data binding were key considerations.
+
+4. **MVVM Architecture**: Adhering to the MVVM architecture while ensuring proper communication between ViewModel, LiveData, and UI components was challenging. It required careful planning to ensure that the application remained maintainable and scalable.
+
+5. **Image Loading**: Integrating Glide for image loading and caching required handling various image formats and ensuring that images were displayed correctly without impacting performance.
+
+6. **Testing**: Writing and running unit and instrumented tests to ensure that all features work as expected and that the application is robust. Setting up the testing environment and dealing with asynchronous operations were notable challenges.
+
+These assumptions and challenges reflect the considerations and obstacles encountered during the development of the UserManager application. Addressing these challenges required thoughtful design decisions and careful implementation to ensure a functional and user-friendly application.
+
