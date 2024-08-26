@@ -70,12 +70,8 @@ This project is an Android application built to manage user data using the MVVM 
 - Internet connectivity is required for the initial data fetch; offline functionality is limited to cached data.
 
 ## Future Enhancements
-- Add pagination support for handling large datasets efficiently.
-- Improve error handling for network issues.
 - Implement user authentication and registration.
 
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
 ## Assumptions and Challenges
