@@ -33,7 +33,7 @@ This project is an Android application built to manage user data using the MVVM 
 - Android Studio Flamingo | 2022.2.1 Patch 2 or higher
 - Java 11
 - Gradle 8.0.0 or higher
-- Minimum SDK level: 21 (Android 5.0)
+- Minimum SDK level: 30
 - Internet access to fetch data from the ReqRes API
 
 ## Installation
