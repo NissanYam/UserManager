@@ -30,7 +30,7 @@ android {
 
 dependencies {
 
-    // Retrofit dependency
+    // Retrofit dependencies
     implementation 'com.squareup.retrofit2:retrofit:2.11.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
 
@@ -47,63 +47,38 @@ dependencies {
     def lifecycle_version = "2.8.4"
     def arch_version = "2.2.0"
 
-    // ViewModel
+    // Lifecycle components
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
-    // LiveData
     implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
-    // Lifecycles only (without ViewModel or LiveData)
     implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
-
-    // Saved state module for ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
-
-    // Annotation processor
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
-    // Alternatively, use this if you're using Java 8 or higher
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
-
-    // Optional - helpers for implementing LifecycleOwner in a Service
     implementation "androidx.lifecycle:lifecycle-service:$lifecycle_version"
-
-    // Optional - ProcessLifecycleOwner provides a lifecycle for the whole application process
     implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
-
-    // Optional - ReactiveStreams support for LiveData
     implementation "androidx.lifecycle:lifecycle-reactivestreams:$lifecycle_version"
-
-    // Optional - Test helpers for LiveData
     testImplementation "androidx.arch.core:core-testing:$arch_version"
-
-    // Optional - Test helpers for Lifecycle runtime
     testImplementation "androidx.lifecycle:lifecycle-runtime-testing:$lifecycle_version"
 
-    // Other dependencies
-    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
-    implementation 'androidx.recyclerview:recyclerview:1.3.2'
-    implementation 'androidx.recyclerview:recyclerview-selection:1.1.0'
-
-    // Glide dependency
+    // Glide dependencies
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
 
-    // For Jetpack compose
+    // Jetpack Compose dependencies
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
-
-    // For Material design
     implementation "androidx.compose.material:material:$material_compose_version"
     implementation "androidx.compose.material:material-icons-extended:$compose_ui_version"
-    implementation "com.google.android.material:material:$android_material_version"
 
-    // For Coil
+    // Coil dependencies for image loading
     implementation "io.coil-kt:coil:$coil_version"
     implementation "io.coil-kt:coil-compose:$coil_version"
     implementation "io.coil-kt:coil-svg:$coil_version"
 
+    // Material Design dependency
     implementation 'com.google.android.material:material:1.9.0'
 
-
+    // Additional dependencies from the `libs.versions.toml` file
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
