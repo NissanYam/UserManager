@@ -104,7 +104,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 5. **Image Loading**: Integrating Glide for image loading and caching required handling various image formats and ensuring that images were displayed correctly without impacting performance.
 
-6. **Testing**: Writing and running unit and instrumented tests to ensure that all features work as expected and that the application is robust. Setting up the testing environment and dealing with asynchronous operations were notable challenges.
-
 These assumptions and challenges reflect the considerations and obstacles encountered during the development of the UserManager application. Addressing these challenges required thoughtful design decisions and careful implementation to ensure a functional and user-friendly application.
 
