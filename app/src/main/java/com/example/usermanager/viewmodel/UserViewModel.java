@@ -22,23 +22,23 @@ public class UserViewModel extends AndroidViewModel {
         Log.d(TAG, "UserViewModel created");
         repository = UserRepository.getInstance(application);
     }
-
+    // Get users from the repository by pagination
     public LiveData<List<User>> getUsersByPagination(int page) {
         Log.d(TAG, "getUsersByPagination called with page: " + page);
         int offset = page * PAGE_SIZE;
         return repository.getUsersByPagination(PAGE_SIZE, offset);
     }
-
+    // Add user to the repository
     public void addUser(User user){
         Log.d(TAG, "addUser called with user: " + user.toString());
         repository.addUser(user);
     }
-
+    // Delete user from the repository
     public void deleteUser(User user){
         Log.d(TAG, "deleteUser called with user: " + user.toString());
         repository.deleteUser(user);
     }
-
+    // Update user in the repository
     public void updateUser(User user){
         Log.d(TAG, "updateUser called with user: " + user.toString());
         repository.updateUser(user);
@@ -49,7 +49,7 @@ public class UserViewModel extends AndroidViewModel {
         super.onCleared();
         Log.d(TAG, "UserViewModel cleared");
     }
-
+    // Get user by id from the repository
     public User getUserById(int id) {
         Log.d(TAG, "getUserById called with id: " + id);
         return repository.getUserById(id).getValue();

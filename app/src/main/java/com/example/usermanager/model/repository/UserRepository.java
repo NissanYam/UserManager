@@ -35,30 +35,38 @@ public class UserRepository {
     private final UserDAO userDAO;
     private static final Object LOCK = new Object();
 
-    private UserRepository(Application application) {
+    public UserRepository(Application application) {
         this.application = application;
+
+        // Initialize the Retrofit API service
         String baseUrl = "https://reqres.in/api/";
         usersApiService = RetrofitClient.getClient(baseUrl).create(UsersApiService.class);
-        RoomDatabase.Callback myCallback = new RoomDatabase.Callback() {
+
+        // Build the Room database and add a callback for initial setup
+        UsersDatabase usersDatabase = Room.databaseBuilder(application, UsersDatabase.class, "users_database")
+                .addCallback(getDatabaseCallback())
+                .build();
+
+        // Initialize the DAO
+        userDAO = usersDatabase.getUserDAO();
+    }
+    // Callback for initial database setup
+    private RoomDatabase.Callback getDatabaseCallback() {
+        return new RoomDatabase.Callback() {
             @Override
             public void onCreate(@NonNull SupportSQLiteDatabase db) {
                 super.onCreate(db);
                 Log.d(TAG, "Database created. Fetching users...");
-                // Fetch users from the API and add them to the databas
-                 fetchUsers(1);
+                fetchUsers(1);
             }
+
             @Override
             public void onOpen(@NonNull SupportSQLiteDatabase db) {
                 super.onOpen(db);
                 Log.d(TAG, "Database opened.");
             }
         };
-        UsersDatabase usersDatabase = Room.databaseBuilder(application, UsersDatabase.class, "users_database")
-                .addCallback(myCallback)
-                .build();
-        userDAO = usersDatabase.getUserDAO();
     }
-
     // Singleton pattern to ensure only one instance of the repository is created
     public static UserRepository getInstance(Application application) {
         if (instance == null) {
@@ -70,7 +78,7 @@ public class UserRepository {
         }
         return instance;
     }
-
+    // Fetch users from the API and add them to the database
     private void fetchUsers(int page) {
         Log.d(TAG, "Fetching users from page: " + page);
         usersApiService.getUsers(page).enqueue(new Callback<UserResponse>() {
@@ -107,12 +115,14 @@ public class UserRepository {
         });
     }
 
+    // Helper method to show a toast message on the main thread
     private void showToast(String message) {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> Toast.makeText(application, message, Toast.LENGTH_SHORT).show());
     }
 
-
+    // Methods for CRUD operations on the database
+    // Add a user to the database
     public void addUser(User user) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
@@ -124,13 +134,12 @@ public class UserRepository {
             });
         });
     }
-
-
+    // Get all users from the database
     public LiveData<List<User>> getUsersByPagination(int limit, int offset) {
         Log.d(TAG, "Retrieving users by pagination. Limit: " + limit + ", Offset: " + offset);
         return userDAO.getUsersByPagination(limit, offset);
     }
-
+    // Delete a user from the database
     public void deleteUser(User user) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
@@ -138,7 +147,7 @@ public class UserRepository {
             userDAO.deleteUser(user);
         });
     }
-
+    // Update a user in the database
     public void updateUser(User user) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
@@ -146,7 +155,7 @@ public class UserRepository {
             userDAO.updateUser(user);
         });
     }
-
+    // Get a user by their ID
     public LiveData<User> getUserById(int id) {
         Log.d(TAG, "Retrieving user by ID: " + id);
         return userDAO.getUserById(id);

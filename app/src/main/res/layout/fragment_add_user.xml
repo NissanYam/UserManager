@@ -92,7 +92,7 @@
             android:layout_gravity="center"
             android:backgroundTint="@color/blue_dark"
             android:text="Save"
-            android:fontFamily="@font/varela_round_regular"
+            android:fontFamily="@font/velar_round_regular"
             android:textColor="@color/white"
             android:paddingStart="24dp"
             android:paddingEnd="24dp" />

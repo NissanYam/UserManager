@@ -76,7 +76,7 @@
                 android:textSize="14sp"
                 android:text="User email"
                 android:gravity="center_vertical"
-                android:fontFamily="@font/varela_round_regular"/>
+                android:fontFamily="@font/velar_round_regular"/>
 
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
@@ -87,7 +87,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:textSize="14sp"
-                    android:fontFamily="@font/varela_round_regular"
+                    android:fontFamily="@font/velar_round_regular"
                     android:gravity="center_vertical"
                     android:text="ID :"/>
                 <View
@@ -100,7 +100,7 @@
                     android:textSize="14sp"
                     android:text="User ID"
                     android:gravity="center_vertical"
-                    android:fontFamily="@font/varela_round_regular"/>
+                    android:fontFamily="@font/velar_round_regular"/>
             </androidx.appcompat.widget.LinearLayoutCompat>
 
         </androidx.appcompat.widget.LinearLayoutCompat>
