@@ -102,3 +102,8 @@ This project is an Android application built to manage user data using the MVVM 
 
 These assumptions and challenges reflect the considerations and obstacles encountered during the development of the UserManager application. Addressing these challenges required thoughtful design decisions and careful implementation to ensure a functional and user-friendly application.
 
+## APK File
+
+You can download the APK file from the following location:
+
+- **[Download UserManager APK](https://github.com/NissanYam/UserManager/releases/latest/download/UserManager.apk)**
