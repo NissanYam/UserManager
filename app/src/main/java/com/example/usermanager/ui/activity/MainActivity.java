@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity
         addUserButton = findViewById(R.id.add_user_button);
         addUserButton.setOnClickListener(view -> {
             setAddUserButtonVisibility(false);
+            addUserFragment.setUser(null);
             loadFragment(addUserFragment, R.id.fragment_user);
         });
     }

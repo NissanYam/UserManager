@@ -61,71 +61,124 @@ public class UserListFragment extends Fragment implements UserCardAdapter.OnUser
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         // Initialize ViewModel, shared with the activity
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+
         // Initialize RecyclerView
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Initialize adapter with the listener
-        adapter = new UserCardAdapter(this,this, null);
+        adapter = new UserCardAdapter(this, this, null);
         recyclerView.setAdapter(adapter);
 
-        loadUsers(currentPageNumber);
+        // Initial data load
+        loadInitialData();
 
         // Create and attach ItemTouchHelper for swipe-to-delete functionality
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter));
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
         // Setup scroll listener for pagination
+        setupScrollListener();
+    }
+
+    private void loadInitialData() {
+        loadUsers(currentPageNumber, true, success -> {
+            if (success) {
+                showToast("Initial users loaded successfully");
+            } else {
+                showToast("No users found");
+            }
+        });
+    }
+
+    private void setupScrollListener() {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            private boolean isLoading = false;
+
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
+                if (isLoading) return;
+
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (layoutManager != null) {
-                    // Check if scrolling up and we are at the top of the list
-                    if (dy < 0 && layoutManager.findFirstCompletelyVisibleItemPosition() == 0) {
-                        // Load previous data if currentPageNumber is not less than 0
-                        if (currentPageNumber > 0) {
-                            Toast.makeText(getContext(), "Loading previous data...", Toast.LENGTH_SHORT).show();
-                            loadUsers(currentPageNumber);
-                            currentPageNumber--;
-                            Log.d("UserFragment", "Loading previous data..." + currentPageNumber);
-                        } else {
-                            Toast.makeText(getContext(), "No more previous data.", Toast.LENGTH_SHORT).show();
-                        }
-                    }
+                    int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+                    int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
 
-                    // Check if scrolling down and we are at the bottom of the list
-                    if (dy > 0 && layoutManager.findLastCompletelyVisibleItemPosition() == adapter.getItemCount() - 1) {
-                        // Load more data
-                        Toast.makeText(getContext(), "Loading more data...", Toast.LENGTH_SHORT).show();
-                        loadUsers(currentPageNumber);
-                        currentPageNumber++;
-                        Log.d("UserFragment", "Loading more data..." + currentPageNumber);
+                    if (dy < 0 && firstVisibleItemPosition <= 1) {
+                        // Scrolling up, load previous data
+                        loadPreviousData();
+                    } else if (dy > 0 && lastVisibleItemPosition >= adapter.getItemCount() - 2) {
+                        // Scrolling down, load more data
+                        loadMoreData();
                     }
                 }
             }
+
+            private void loadPreviousData() {
+                if (currentPageNumber > 0) {
+                    isLoading = true;
+                    loadUsers(currentPageNumber - 1, false, success -> {
+                        if (success) {
+                            currentPageNumber--;
+                        } else {
+                            showToast("No more previous data");
+                        }
+                        isLoading = false;
+                    });
+                } else {
+                    showToast("No more previous data");
+                }
+            }
+
+            private void loadMoreData() {
+                isLoading = true;
+                loadUsers(currentPageNumber + 1, false, success -> {
+                    if (success) {
+                        currentPageNumber++;
+                    } else {
+                        showToast("No more data available");
+                    }
+                    isLoading = false;
+                });
+            }
         });
-
-
     }
-    private void loadUsers(int page) {
+
+    private void showToast(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    public interface LoadUsersCallback {
+        void onResult(boolean success);
+    }
+
+    private void loadUsers(int page, boolean firstLoad, LoadUsersCallback loadUsersCallback) {
         userViewModel.getUsersByPagination(page).observe(getViewLifecycleOwner(), users -> {
             if (users != null && !users.isEmpty()) {
                 Log.d("UserFragment", "Loaded users: " + users.size());
                 adapter.addUsers(users);
-                if (listener != null && !users.isEmpty()) {
+
+                // Trigger the callback with 'true' since users were found
+                loadUsersCallback.onResult(true);
+
+                if (listener != null && firstLoad) {
                     int rand = (int) (Math.random() * users.size());
                     listener.onUserSelected(users.get(rand));
-                }else {
-                    Log.e("UserFragment", "Error loading users");
                 }
+            } else {
+                Log.e("UserFragment", "Error loading users");
+
+                // Trigger the callback with 'false' since no users were found
+                loadUsersCallback.onResult(false);
             }
         });
     }
+
 
 
     @Override

@@ -130,7 +130,7 @@ public class UserRepository {
             Log.d(TAG, "Adding user: " + user.toString());
             userDAO.addUser(user);
             handler.post(() -> {
-                Toast.makeText(application, "User" + user.getFirst_name() + " "+ user.getLast_name()+ " added successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(application, "User " + user.getFirst_name() + " "+ user.getLast_name()+ " added successfully", Toast.LENGTH_SHORT).show();
             });
         });
     }
